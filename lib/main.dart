@@ -20,7 +20,7 @@ class FlutterLab01 extends StatelessWidget {
     return const MaterialApp(
       title: 'FlutterLab02-1289',
       debugShowCheckedModeBanner: false,
-      home: HeightScreen(),
+      home: GenderScreen(),
     );
   }
 }

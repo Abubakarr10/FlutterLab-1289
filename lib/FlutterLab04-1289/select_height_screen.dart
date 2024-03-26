@@ -1,55 +1,38 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lab01_1289/FlutterLab04-1289/select_weight_screen.dart';
 
 class HeightScreen extends StatefulWidget {
-  const HeightScreen({super.key});
+  final String gender;
+  int? height;
+  HeightScreen({super.key, this.height=0, required this.gender});
 
   @override
   State<HeightScreen> createState() => _HeightScreenState();
 }
 
 class _HeightScreenState extends State<HeightScreen> {
-  List<int> heightValues =
-      List.generate(250, (index) => index + 1); // Start from 1
+  List<int> values01 =
+      List.generate(261, (index) => index + 100); // Start from 1
+
+
   int selectedHeight1 = 125; // Default selected age
   bool isHeightSelected = false; // Flag to track if an age is selected
-  final ScrollController _scrollController = ScrollController();
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_scrollListener);
-  }
 
-  void _scrollListener() {
-    // Calculate the index of the selected height based on scroll position
-    double itemHeight = 20;
-    int selectedIndex = (_scrollController.offset / itemHeight).round();
 
-    if (selectedIndex >= 0 && selectedIndex < heightValues.length) {
-      int heightToSelect = heightValues[selectedIndex];
 
-      // Check if the height with the desired text color is within a certain range
-      if (heightToSelect >= 0 && heightToSelect <= 100) {
-        setState(() {
-          selectedHeight1 = heightToSelect;
-          isHeightSelected = true;
-        });
-      } else {
-        // Height not within the desired range, reset the flag
-        setState(() {
-          isHeightSelected = false;
-        });
-      }
-    }
-  }
+  final FixedExtentScrollController scrollController =
+  FixedExtentScrollController(initialItem: 0);
+  int selectedIndex = 0;
 
 //----------------------------------------------------------
-  int meter = 100;
+
 
   @override
   Widget build(BuildContext context) {
+    var heightValues = values01.sublist(10, 161);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,30 +76,29 @@ class _HeightScreenState extends State<HeightScreen> {
           ),
 
           SizedBox(
-            height: 400,
-            child: Center(
-              child: ListView.builder(
-                shrinkWrap: true,
-              //  dragStartBehavior: DragStartBehavior.down,
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: heightValues.length,
-                  itemBuilder: (context, index) {
-                    int currentHeight = heightValues[index];
-                    bool isCenter = currentHeight == selectedHeight1;
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          selectedHeight1 = currentHeight;
-                          isHeightSelected =
-                              true; // Set the flag to true when an age is selected
-                        });
-                      },
-                      child: isCenter
-                          ? Container(
-                              height: 400,
-                              width: 250,
-                              margin: const EdgeInsets.only(left: 5, right: 10),
+            height: MediaQuery.sizeOf(context).height * .2,
+            width: MediaQuery.sizeOf(context).width,
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: ListWheelScrollView(
+                  itemExtent: 170,
+                  controller: scrollController,
+                  physics: const FixedExtentScrollPhysics(),
+                  onSelectedItemChanged: (index) {
+                    setState(() {
+                      selectedIndex = index;
+                      widget.height = heightValues[index];
+                    });
+                  },
+                  children: List.generate(heightValues.length, (index) {
+                    int currentHeight = index;
+                    bool isCenter = currentHeight == selectedIndex;
+                    return isCenter
+                        ? RotatedBox(
+                            quarterTurns: 1,
+                            child: Container(
+                              margin:
+                                  const EdgeInsets.only(left: 5, right: 10),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(40),
                                   gradient: LinearGradient(colors: [
@@ -125,14 +107,16 @@ class _HeightScreenState extends State<HeightScreen> {
                                   ])),
                               child: Center(
                                   child: Text(
-                                "$currentHeight",
+                                heightValues[index].toString(),
                                 style: const TextStyle(
-                                    fontSize: 100, fontWeight: FontWeight.w700),
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.w700),
                               )),
-                            )
-                          : Container(
-                              height: 200,
-                              width: 100,
+                            ),
+                          )
+                        : RotatedBox(
+                      quarterTurns: 1,
+                      child: Container(
                               margin: const EdgeInsets.only(left: 5, right: 10),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(40),
@@ -142,16 +126,37 @@ class _HeightScreenState extends State<HeightScreen> {
                                   ])),
                               child: Center(
                                   child: Text(
-                                "$currentHeight",
+                                    heightValues[index].toString(),
                                 style: const TextStyle(
                                     fontSize: 40, fontWeight: FontWeight.w300),
                               )),
                             ),
-                    );
-                  }),
+                        );
+                  })),
             ),
           ),
 
+          SizedBox(height: MediaQuery.sizeOf(context).height * .15,),
+
+          // Next Button
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> WeightScreen(
+                gender: widget.gender,
+                height: widget.height!,
+              )));
+            },
+            style: ButtonStyle(
+              fixedSize: MaterialStateProperty.all<Size>(
+                const Size(250, 50),
+              ),
+              backgroundColor:
+              MaterialStateProperty.all<Color>(
+                Colors.pinkAccent,
+              ),
+            ),
+            child: const Text('Next',style: TextStyle(color: Colors.white,fontSize: 20),),
+          )
         ],
       ),
     );
