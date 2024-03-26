@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // === Fruits and berries (Text) ===
+            // === Cars (Text) ===
             const Padding(
               padding: EdgeInsets.only(left: 20, bottom: 15),
               child: Text(
